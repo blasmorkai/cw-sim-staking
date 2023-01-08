@@ -126,13 +126,33 @@ mod tests {
             let (mut app, staking_contract) = staking_instantiate();
 
             let balance = app.wrap().query_balance(staking_contract.addr(), NATIVE_DENOM).unwrap();
-            println!("######### BALANCE: {:?}", balance);
+            println!("######### INITIAL - BALANCE: {:?}", balance);
 
             let msg = ExecuteMsg::Transfer { };
             app.execute_contract(Addr::unchecked(USER1), staking_contract.addr(), &msg, &[coin(600, NATIVE_DENOM.to_string())]).unwrap();
 
             let balance = app.wrap().query_balance(staking_contract.addr(), NATIVE_DENOM).unwrap();
-            println!("######### BALANCE: {:?}", balance);
+            println!("######### USER SENDS 600 TOKENS - BALANCE: {:?}", balance);
+
+            // Delegate the hard coded 100 tokens
+            let msg = ExecuteMsg::Bond { val_addr: VALIDATOR1.to_string() };
+            app.execute_contract(Addr::unchecked(USER1), staking_contract.addr(), &msg, &[]).unwrap();
+
+            let balance = app.wrap().query_balance(staking_contract.addr(), NATIVE_DENOM).unwrap();
+            println!("######### CONTRACT STAKES 100 TOKENS - BALANCE: {:?}", balance);
+
+            let delegation = app.wrap().query_delegation(staking_contract.addr(), VALIDATOR1.to_string()).unwrap().unwrap();
+            println!("######### VALIDATOR1 BONDED FROM CONTRACT - BALANCE: {:?}", delegation.amount);
+
+            // Unbond the hard coded 100 tokens
+            let msg = ExecuteMsg::Unbond { val_addr: VALIDATOR1.to_string() };
+            app.execute_contract(Addr::unchecked(USER1), staking_contract.addr(), &msg, &[]).unwrap();
+
+            app.update_block(|block| block.time = block.time.plus_seconds(60 * 60 * 24 * 31 * 12 ));
+
+            let balance = app.wrap().query_balance(staking_contract.addr(), NATIVE_DENOM).unwrap();
+            println!("######### CONTRACT BALANCE AFTER UNBONDING 100 TOKENS A YEAR LATER  - BALANCE: {:?}", balance);
+
         }
     }
 }
