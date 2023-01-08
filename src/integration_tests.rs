@@ -150,6 +150,10 @@ mod tests {
 
             app.update_block(|block| block.time = block.time.plus_seconds(60 * 60 * 24 * 31 * 12 ));
 
+
+            let delegation = app.wrap().query_delegation(staking_contract.addr(), VALIDATOR1.to_string()).unwrap();
+            println!("######### VALIDATOR1 BONDED FROM CONTRACT AFTER UNBONDING 100 TOKENS - BALANCE: {:?}", delegation);
+
             let balance = app.wrap().query_balance(staking_contract.addr(), NATIVE_DENOM).unwrap();
             println!("######### CONTRACT BALANCE AFTER UNBONDING 100 TOKENS A YEAR LATER  - BALANCE: {:?}", balance);
 
