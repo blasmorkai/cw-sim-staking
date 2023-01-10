@@ -150,6 +150,9 @@ mod tests {
 
             app.update_block(|block| block.time = block.time.plus_seconds(60 * 60 * 24 * 31 * 12 ));
 
+            //cw-multi-test provide a StakingSudo::ProcessQueue {} msg, where it process the queue, 1 entry per msg, so to do 2 delegations at the same time, send this msg twice
+            app.sudo(cw_multi_test::SudoMsg::Staking(cw_multi_test::StakingSudo::ProcessQueue {})).unwrap();
+            app.sudo(cw_multi_test::SudoMsg::Staking(cw_multi_test::StakingSudo::ProcessQueue {})).unwrap();
 
             let delegation = app.wrap().query_delegation(staking_contract.addr(), VALIDATOR1.to_string()).unwrap();
             println!("######### VALIDATOR1 BONDED FROM CONTRACT AFTER UNBONDING 100 TOKENS - BALANCE: {:?}", delegation);
